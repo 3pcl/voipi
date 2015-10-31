@@ -30,7 +30,7 @@ int pa_simple_write( pa_simple* s,
 
 
 
-	printf("Hello world bitch\n");
+printf("Hello world\n");
 
 	
 return 0;
