@@ -19,7 +19,7 @@ s= pa_simple_new(NULL,			//default server
 		&ss,			//sample format
 		NULL,			//default channel map
 		NULL, 			//default buffering atributes
-		NULL,			//Ignore error code
+		NULL			//Ignore error code
 		);
 
 int pa_simple_write( pa_simple* s,

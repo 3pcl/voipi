@@ -1,7 +1,7 @@
 CC=gcc
-INCL=
+INCL=-lpulse-simple
 
 all:
-	gcc main.c -o main
+	$(CC) main.c $(INCL) -o main
 clean:
 	rm main
