@@ -1,5 +1,5 @@
 CC=gcc
-INCL=-lpulse-simple
+INCL=-lpulse-simple -lm
 
 all:
 	$(CC) main.c $(INCL) -o main
