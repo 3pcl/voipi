@@ -2,25 +2,24 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 #include <math.h>
-#include<string.h> //memset
-#include<stdlib.h> //exit(0);
-#include<arpa/inet.h>
-#include<sys/socket.h>
+#include <string.h> 
+#include <stdlib.h> 
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <pthread.h>
+#include <unistd.h>
 
 
-#define SERVER "127.0.0.1"
-#define BUFLEN 512  //Max length of buffer
-#define PORT 8888   //The port on which to send data
- 
+int main(int argc, char **argv){
 
-void die(char *s)
-{
-    perror(s);
-    exit(1);
-}
+	if(argc < 4) { printf("Usage: %s IP PORT BUFFER_SIZE\n", argv[0]); exit(1); }
 
 
-int main(int argc, char *argv){
+	char server[100];
+	strncpy(server, argv[1], 100);
+
+	int port = atoi(argv[2]);
+	int buflen = atoi(argv[3]);
 
 
 // init pulseaudio
@@ -45,19 +44,24 @@ int main(int argc, char *argv){
 
 	struct sockaddr_in si_other;
 	int sck, i, slen=sizeof(si_other);
-	unsigned char buf[BUFLEN];
+
+	printf("initialising buffer: %d\n ", buflen);
+
+	unsigned char *buf = malloc(sizeof(unsigned char) * buflen);
+
 
 
 	if ( (sck=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
-		die("socket");
+		fprintf(stderr, "inet_aton() failed\n");
+		exit(1);
 	}
 
 	memset((char *) &si_other, 0, sizeof(si_other));
 	si_other.sin_family = AF_INET;
-	si_other.sin_port = htons(PORT);
+	si_other.sin_port = htons(port);
 
-	if (inet_aton(SERVER , &si_other.sin_addr) == 0) 
+	if (inet_aton(server , &si_other.sin_addr) == 0) 
 	{
 		fprintf(stderr, "inet_aton() failed\n");
 		exit(1);
@@ -65,19 +69,15 @@ int main(int argc, char *argv){
 
 // end of socket init
 
-	int error;	
 
 	while(1) {
-	
-			
-		pa_simple_read(s, buf, BUFLEN, NULL);
-		sendto(sck, buf, BUFLEN, 0 , (struct sockaddr *) &si_other, slen);
+
+		pa_simple_read(s, buf, buflen, NULL);
+		sendto(sck, buf, buflen, 0 , (struct sockaddr *) &si_other, slen);
 
 	}
 
-
 	printf("Hello world\n");
-
 
 	return 0;
 }
