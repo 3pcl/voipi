@@ -77,7 +77,7 @@ int main(int argc, char **argv){
 
 		pa_simple_read(s, buf, buflen, NULL);
 		buf[128] = counter;
-		sendto(sck, buf, buflen, 0 , (struct sockaddr *) &si_other, slen);
+		sendto(sck, buf, buflen+1, 0 , (struct sockaddr *) &si_other, slen);
 		counter++;
 
 	}
