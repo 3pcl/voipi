@@ -115,12 +115,13 @@ int main(int argc, char **argv){
 		for(x=0; x<lead; x++) {
 			if(writebuf[x] == false) isBufferfull = false;
 		}
-
+		usleep(1000);
 	}
 
 	printf("OK!\n");
 
 	int idx, count=0;
+	double bufferState = 0;
 
 	while(1) {
 
@@ -135,7 +136,20 @@ int main(int argc, char **argv){
 			else {printf("%c", writebuf[x]==true?'#':'-'); }
 		}
 
-		printf("   %.2f%%", 100*(float)count/(lead));
+		bufferState = 100*(float)count/(lead);
+		printf("   %.2f%%", bufferState);
+		if(bufferState < 20) {
+			isBufferfull = false;
+			while(!isBufferfull) {
+
+				isBufferfull = true;
+				for(x=0; x<lead; x++) {
+					if(writebuf[x] == false) isBufferfull = false;
+				}
+
+			}
+
+		}
 		
 		// if the sample we played has been used before, print underrun message
 		if(writebuf[idx/buflen] == false) { printf(" underrun!"); }	
