@@ -60,7 +60,7 @@ void *recvData(void *arg) {
 		if((counter - lastc) > 1 && (counter - lastc) < 50) printf("\nLOST PACKET\n");
 
 		printf(" > %d->%d < ", counter, lastc);
-		lastc = coutner;
+		lastc = counter;
 		writebuf[bufi/buflen] = true;
 		bufi += recv_len;
 		if(bufi >= buflen*lead) bufi = 0;
