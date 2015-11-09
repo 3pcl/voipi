@@ -109,12 +109,7 @@ int main(int argc, char **argv){
 	printf("Filling in the buffer... \n");
 
 	bool isBufferfull = false;
-	while(!isBufferfull) {
-
-		isBufferfull = true;
-		for(x=0; x<lead; x++) {
-			if(writebuf[x] == false) isBufferfull = false;
-		}
+	while(writebuf[lead-2] != true) {
 		usleep(1000);
 	}
 
@@ -147,6 +142,7 @@ int main(int argc, char **argv){
 					if(writebuf[x] == false) isBufferfull = false;
 				}
 
+				usleep(1000);
 			}
 
 		}
