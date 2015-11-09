@@ -8,8 +8,10 @@
 #include <sys/socket.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 unsigned char *bigbuff;
+bool *writebuf;
 
 struct listenerArgs {
 	char *server;
@@ -49,7 +51,8 @@ void *recvData(void *arg) {
 	while(1) {
 
 		recv_len = recvfrom(sck, bigbuff+bufi, buflen, 0, (struct sockaddr *) &si_other, &slen);
-
+		printf(".");
+		writebuf[bufi/buflen] = true;
 		bufi += recv_len;
 		if(bufi >= buflen*lead) bufi = 0;
 		
@@ -90,18 +93,48 @@ int main(int argc, char **argv){
 	la.lead = lead;
 
 	bigbuff = malloc(sizeof(unsigned char) * buflen * lead);
+	for(int x=0; x<buflen*lead; x++) bigbuff[x]=127;
 
+	writebuf = malloc(sizeof(bool) * lead);
+	for(int x=0; x<lead; x++) writebuf[x]=false;
 
-	sleep(1);	// a lame way of waiting for the buffer to fill in
 
 	pthread_t fillerThread;
 	pthread_create(&fillerThread, NULL, recvData, &la);
 
-	int idx;
+	usleep(500*1000);	// just wait 0.5s
+
+	printf("Filling in the buffer... \n");
+
+	bool isBufferfull = false;
+	while(!isBufferfull) {
+
+		isBufferfull = true;
+		for(int x=0; x<lead; x++) {
+			if(writebuf[x] == false) isBufferfull = false;
+		}
+
+	}
+
+	printf("OK!\n");
+
+	int idx, count=0;
 
 	while(1) {
 
+		
 		pa_simple_write(s, bigbuff+idx, buflen, NULL);
+
+		// displaying current status of buffer
+		for(int x=0; x<lead; x++) { if(x==idx/buflen) printf("@"); else printf("%c", writebuf[x]==true?'#':'-'); }
+		
+		// if the sample we played has been used before, print underrun message
+		if(writebuf[idx/buflen] == false) { printf(" underrun!"); }	
+		printf("\n");
+
+		// mark what's already been played
+		writebuf[idx/buflen] = false;
+
 		idx += buflen;
 		if(idx >= buflen*lead) idx = 0;
 
