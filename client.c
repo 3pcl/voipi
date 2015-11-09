@@ -37,9 +37,6 @@ void *recvData(void *arg) {
 	struct sockaddr_in si_other;
 	int sck, i, slen=sizeof(si_other);
 
-	unsigned char *tempbuf = malloc(sizeof(unsigned char) * (buflen+1));
-	unsigned char counter = 0, lastc = 0;
-
 	if ( (sck=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) { fprintf(stderr, "socket err\n"); exit(1); }
 
 	memset((char *) &si_other, 0, sizeof(si_other));
@@ -52,15 +49,8 @@ void *recvData(void *arg) {
 
 	while(1) {
 
-		//recv_len = recvfrom(sck, bigbuff+bufi, buflen, 0, (struct sockaddr *) &si_other, &slen);
-		recv_len = recvfrom(sck, tempbuf, buflen+1, 0, (struct sockaddr *) &si_other, &slen);
-		memcpy(bigbuff+bufi, tempbuf, 128);
+		recv_len = recvfrom(sck, bigbuff+bufi, buflen, 0, (struct sockaddr *) &si_other, &slen);
 		
-		counter = tempbuf[128];
-		if((counter - lastc) > 1 && (counter - lastc) < 50) printf("\nLOST PACKET\n");
-
-		printf(" > %d->%d < ", counter, lastc);
-		lastc = counter;
 		writebuf[bufi/buflen] = true;
 		bufi += recv_len;
 		if(bufi >= buflen*lead) bufi = 0;
