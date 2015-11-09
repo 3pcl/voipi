@@ -51,7 +51,7 @@ void *recvData(void *arg) {
 	while(1) {
 
 		recv_len = recvfrom(sck, bigbuff+bufi, buflen, 0, (struct sockaddr *) &si_other, &slen);
-		printf(".");
+//		printf(".");
 		writebuf[bufi/buflen] = true;
 		bufi += recv_len;
 		if(bufi >= buflen*lead) bufi = 0;
@@ -92,11 +92,13 @@ int main(int argc, char **argv){
 	int lead = atoi(argv[4]);
 	la.lead = lead;
 
+	int x = 0; // for fors
+
 	bigbuff = malloc(sizeof(unsigned char) * buflen * lead);
-	for(int x=0; x<buflen*lead; x++) bigbuff[x]=127;
+	for(x=0; x<buflen*lead; x++) bigbuff[x]=127;
 
 	writebuf = malloc(sizeof(bool) * lead);
-	for(int x=0; x<lead; x++) writebuf[x]=false;
+	for(x=0; x<lead; x++) writebuf[x]=false;
 
 
 	pthread_t fillerThread;
@@ -110,7 +112,7 @@ int main(int argc, char **argv){
 	while(!isBufferfull) {
 
 		isBufferfull = true;
-		for(int x=0; x<lead; x++) {
+		for(x=0; x<lead; x++) {
 			if(writebuf[x] == false) isBufferfull = false;
 		}
 
@@ -126,7 +128,14 @@ int main(int argc, char **argv){
 		pa_simple_write(s, bigbuff+idx, buflen, NULL);
 
 		// displaying current status of buffer
-		for(int x=0; x<lead; x++) { if(x==idx/buflen) printf("@"); else printf("%c", writebuf[x]==true?'#':'-'); }
+		count=0;
+		for(x=0; x<lead; x++) { 
+			if(writebuf[x] == true) count++;
+			if(x==idx/buflen) { printf("@"); }
+			else {printf("%c", writebuf[x]==true?'#':'-'); }
+		}
+
+		printf("   %.2f%%", (float)count/(lead));
 		
 		// if the sample we played has been used before, print underrun message
 		if(writebuf[idx/buflen] == false) { printf(" underrun!"); }	
