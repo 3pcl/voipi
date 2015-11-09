@@ -135,7 +135,7 @@ int main(int argc, char **argv){
 			else {printf("%c", writebuf[x]==true?'#':'-'); }
 		}
 
-		printf("   %.2f%%", (float)count/(lead));
+		printf("   %.2f%%", 100*(float)count/(lead));
 		
 		// if the sample we played has been used before, print underrun message
 		if(writebuf[idx/buflen] == false) { printf(" underrun!"); }	
