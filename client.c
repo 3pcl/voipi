@@ -135,14 +135,10 @@ int main(int argc, char **argv){
 		printf("   %.2f%%", bufferState);
 		if(bufferState < 20) {
 			isBufferfull = false;
-			while(!isBufferfull) {
-
-				isBufferfull = true;
-				for(x=0; x<lead; x++) {
-					if(writebuf[x] == false) isBufferfull = false;
-				}
+			while(writebuf[ (( (idx/buflen)+lead -3 ) % lead) ] != true) {
 
 				usleep(1000);
+				
 			}
 
 		}
