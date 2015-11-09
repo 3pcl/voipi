@@ -37,6 +37,9 @@ void *recvData(void *arg) {
 	struct sockaddr_in si_other;
 	int sck, i, slen=sizeof(si_other);
 
+	unsigned char *tempbuf = malloc(sizeof(unsigned char) * (buflen+1));
+	unsigned char counter = 0;
+
 	if ( (sck=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) { fprintf(stderr, "socket err\n"); exit(1); }
 
 	memset((char *) &si_other, 0, sizeof(si_other));
@@ -45,13 +48,14 @@ void *recvData(void *arg) {
 
 	if (inet_aton(server, &si_other.sin_addr) == 0) { fprintf(stderr, "inet_aton() failed\n"); exit(1); }
 
-
 	if( bind(sck, (struct sockaddr*)&si_other, sizeof(si_other) ) == -1) { fprintf(stderr, "bind err\n"); exit(1); } 
 
 	while(1) {
 
-		recv_len = recvfrom(sck, bigbuff+bufi, buflen, 0, (struct sockaddr *) &si_other, &slen);
-//		printf(".");
+		//recv_len = recvfrom(sck, bigbuff+bufi, buflen, 0, (struct sockaddr *) &si_other, &slen);
+		recv_len = recvfrom(sck, tempbuf, buflen, 0, (struct sockaddr *) &si_other, &slen);
+		memcpy(bigbuff+bufi, tempbuf+1, 128);
+		counter = tempbuf[0];
 		writebuf[bufi/buflen] = true;
 		bufi += recv_len;
 		if(bufi >= buflen*lead) bufi = 0;
@@ -104,7 +108,7 @@ int main(int argc, char **argv){
 	pthread_t fillerThread;
 	pthread_create(&fillerThread, NULL, recvData, &la);
 
-	usleep(500*1000);	// just wait 0.5s
+	// usleep(500*1000);	// just wait 0.5s
 
 	printf("Filling in the buffer... \n");
 
@@ -133,12 +137,22 @@ int main(int argc, char **argv){
 
 		bufferState = 100*(float)count/(lead);
 		printf("   %.2f%%", bufferState);
-		if(bufferState < 20) {
-			isBufferfull = false;
-			while(writebuf[ (( (idx/buflen)+lead -3 ) % lead) ] != true) {
+		if(bufferState < 30) {
 
-				usleep(1000);
-				
+			printf("\nFilling in!\n");
+
+			
+			isBufferfull = false;
+			while(true) {
+				count = 0;		
+				isBufferfull = true;
+				for(x=0; x<lead; x++) {
+					if(writebuf[x] == true) count++;
+				}
+
+				if((100*count)/lead > 90) { printf("\nOK!\n"); break; }
+				usleep(1000); //wait 1ms
+
 			}
 
 		}

@@ -47,7 +47,7 @@ int main(int argc, char **argv){
 
 	printf("initialising buffer: %d\n ", buflen);
 
-	unsigned char *buf = malloc(sizeof(unsigned char) * buflen);
+	unsigned char *buf = malloc(sizeof(unsigned char) * (buflen+1));
 
 
 
@@ -69,11 +69,16 @@ int main(int argc, char **argv){
 
 // end of socket init
 
+	
+
+	unsigned char counter = 0;
 
 	while(1) {
 
-		pa_simple_read(s, buf, buflen, NULL);
-		sendto(sck, buf, buflen, 0 , (struct sockaddr *) &si_other, slen);
+		pa_simple_read(s, buf+1, buflen, NULL);
+		buf[0] = counter;
+		sendto(sck, buf, buflen+1, 0 , (struct sockaddr *) &si_other, slen);
+		counter++;
 
 	}
 
